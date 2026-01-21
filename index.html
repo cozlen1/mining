@@ -1,414 +1,871 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TetraHub Mobile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tetra Empire - v15.1 (Elite Wallet UI)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
-                    colors: { dark: '#0f172a', card: 'rgba(30, 41, 59, 0.7)' },
-                    animation: { 'blob': 'blob 7s infinite' },
-                    keyframes: {
-                        blob: {
-                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body {
-            background-color: #000000;
-            background-image: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-            background-attachment: fixed;
-            color: white;
-            -webkit-tap-highlight-color: transparent;
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Outfit:wght@300;500;800&display=swap');
+        
+        :root { --primary: #cffafe; --accent: #818cf8; --safe-top: env(safe-area-inset-top); --safe-bottom: env(safe-area-inset-bottom); }
+        * { -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; box-sizing: border-box; }
+        
+        body { background-color: #020617; color: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; margin: 0; display: flex; justify-content: center; height: 100dvh; }
+        .app-container { width: 100%; max-width: 480px; height: 100%; position: relative; display: flex; flex-direction: column; background: radial-gradient(circle at 50% -20%, #1e293b 0%, #020617 60%); }
+        .font-luxury { font-family: 'Outfit', sans-serif; }
+        
+        .aesthetic-card { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2); border-radius: 24px; }
+        
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-12px); } }
+        .core-sphere { position: relative; width: 260px; height: 260px; border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: float 6s ease-in-out infinite; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), transparent 60%); }
+        .core-sphere:active { transform: scale(0.94); }
+        
+        .tap-value { position: absolute; pointer-events: none; animation: riseFade 0.8s ease-out forwards; font-weight: 800; font-family: 'Outfit', sans-serif; color: #fff; z-index: 100; font-size: 2.5rem; text-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        @keyframes riseFade { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 20% { opacity: 1; transform: translate(-50%, -100px) scale(1.2); } 100% { transform: translate(-50%, -200px) scale(1); opacity: 0; } }
+        
+        .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #cffafe, #818cf8); border-radius: 100px; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .ad-progress-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 100px; transition: width 0.3s ease; }
+        
+        .custom-scroll::-webkit-scrollbar { display: none; }
+        .tab-content { display: none; opacity: 0; transition: all 0.4s ease; height: 100%; overflow-y: auto; padding-bottom: 120px; }
+        .tab-content.active { display: flex; flex-direction: column; opacity: 1; }
+        
+        .nav-item { transition: all 0.3s ease; color: #64748b; position: relative; }
+        .nav-item.active { color: var(--primary); transform: translateY(-2px); }
+        .nav-item.active::after { content: ''; position: absolute; bottom: -8px; width: 4px; height: 4px; background: var(--primary); border-radius: 50%; box-shadow: 0 0 10px var(--primary); }
+        
+        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: rgba(129, 140, 248, 0.8); box-shadow: 0 0 15px rgba(129, 140, 248, 0.8); animation: scan 2s linear infinite; }
+        @keyframes scan { 0% {top:0} 100% {top:100%} }
+        .glitch-text { animation: glitch 1s infinite alternate; }
+        @keyframes glitch { 0% { transform: skew(0deg); } 20% { transform: skew(-2deg); opacity: 0.8; } 40% { transform: skew(2deg); opacity: 1; } 100% { transform: skew(0deg); } }
+        
+        .ambient-glow { position: absolute; width: 300px; height: 300px; border-radius: 50%; filter: blur(120px); opacity: 0.15; z-index: 0; pointer-events: none; }
+        
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px); background: rgba(16, 185, 129, 0.9); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 50px; font-weight: bold; font-size: 12px; z-index: 3000; transition: transform 0.5s; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .badge-premium {
+            position: relative;
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.4) 0%, rgba(120, 53, 15, 0.6) 100%) !important;
+            border: 1px solid rgba(251, 191, 36, 0.8) !important;
+            color: #fcd34d !important;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            text-transform: uppercase;
+            overflow: hidden;
+            display: inline-flex;
+            align-items: center;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            animation: none !important;
         }
-        .glass-panel { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .glass-card { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); transition: transform 0.2s, background 0.2s; }
-        .glass-card:active { transform: scale(0.96); background: rgba(30, 41, 59, 0.8); }
-        ::-webkit-scrollbar { display: none; }
-        * { -ms-overflow-style: none; scrollbar-width: none; }
-        #transition-overlay { clip-path: circle(0% at 50% 50%); transition: clip-path 0.6s cubic-bezier(0.7, 0, 0.3, 1); pointer-events: none; }
-        #transition-overlay.active { clip-path: circle(150% at 50% 50%); pointer-events: auto; }
+
+        .badge-premium::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -200%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: skewX(-20deg);
+            animation: slowShimmer 8s infinite linear !important;
+        }
+
+        @keyframes slowShimmer { 0% { left: -200%; } 20% { left: 200%; } 100% { left: 200%; } }
+
+        #authScreen { position: fixed; inset: 0; z-index: 5000; background: #020617; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .auth-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 12px; color: white; margin-bottom: 12px; font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
+        .auth-input:focus { border-color: #818cf8; outline: none; background: rgba(255,255,255,0.1); }
+        .avatar-option { width: 50px; height: 50px; border-radius: 50%; border: 2px solid transparent; opacity: 0.6; cursor: pointer; transition: all 0.2s; }
+        .avatar-option.selected { border-color: #22d3ee; opacity: 1; transform: scale(1.1); box-shadow: 0 0 15px rgba(34,211,238,0.5); }
     </style>
 </head>
-<body class="antialiased h-screen overflow-hidden flex flex-col">
+<body>
+    <div class="app-container overflow-hidden" id="app">
+        <div class="ambient-glow bg-cyan-500 top-[-10%] left-[-10%] animate-pulse"></div>
+        <div class="ambient-glow bg-indigo-500 bottom-[-10%] right-[-10%] animate-pulse" style="animation-delay: 1s;"></div>
+        <div id="toast" class="toast"><i data-lucide="check-circle" class="w-4 h-4"></i><span id="toastMsg">İşlem Başarılı</span></div>
 
-    <div class="fixed top-20 left-10 w-72 h-72 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-    <div class="fixed top-20 right-10 w-72 h-72 bg-cyan-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-    <div class="fixed -bottom-8 left-20 w-72 h-72 bg-pink-600 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
-
-    <div id="app" class="relative z-10 flex flex-col max-w-md mx-auto w-full h-full">
-        
-        <header class="p-6 flex justify-between items-center flex-shrink-0">
-            <div>
-                <h2 class="text-sm text-gray-400 font-medium">Welcome,</h2>
-                <h1 id="user-display-name" class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400"></h1>
-            </div>
-            <div id="profile-div" class="relative group cursor-default">
-                <div id="profile-picture-container" class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px]">
-                    <img id="profile-image" src="" alt="Profile" class="rounded-full w-full h-full object-cover">
+        <div id="authScreen">
+            <div class="w-full max-sm:max-w-xs">
+                <div class="text-center mb-10">
+                    <div class="w-24 h-24 mx-auto mb-4 relative">
+                        <div class="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full"></div>
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=tetra" class="w-full h-full object-contain relative z-10 drop-shadow-2xl">
+                    </div>
+                    <h1 class="text-4xl font-extrabold font-luxury text-white tracking-tighter mb-1">TETRA EMPIRE</h1>
+                    <p class="text-sm text-indigo-400 font-mono tracking-widest uppercase">SECURE ACCESS V15.1</p>
                 </div>
-                <div id="online-status" class="absolute top-0 right-0 w-3 h-3 rounded-full border-2 border-black"></div>
-            </div>
-        </header>
 
-        <div class="px-6 mb-6 flex-shrink-0">
-            <div class="glass-panel rounded-2xl p-5 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white opacity-5 rounded-full blur-xl"></div>
-                <p class="text-gray-400 text-xs font-semibold tracking-wider uppercase">Total Assets</p>
-                <div class="flex items-baseline mt-1 space-x-1">
-                    <span class="text-3xl font-bold">$12,450.00</span>
-                    <span class="text-green-400 text-sm font-medium flex items-center"><i class="fas fa-arrow-up text-xs mr-1"></i> 4.2%</span>
+                <div class="flex p-1 bg-white/5 rounded-xl mb-8">
+                    <button onclick="toggleAuthMode('login')" id="tabLogin" class="flex-1 py-3 rounded-lg text-xs font-bold uppercase bg-indigo-600 text-white shadow-lg transition-all">Giriş Yap</button>
+                    <button onclick="toggleAuthMode('register')" id="tabRegister" class="flex-1 py-3 rounded-lg text-xs font-bold uppercase text-slate-400 hover:text-white transition-all">Kayıt Ol</button>
                 </div>
-                <div class="mt-4 flex gap-3">
-                    <button class="flex-1 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xs font-semibold backdrop-blur-sm transition">Deposit</button>
-                    <button class="flex-1 bg-white/10 hover:bg-white/20 py-2 rounded-lg text-xs font-semibold backdrop-blur-sm transition">Withdraw</button>
+
+                <div id="loginForm" class="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <input type="text" id="loginUser" class="auth-input" placeholder="Kullanıcı Adı">
+                    <input type="password" id="loginPass" class="auth-input" placeholder="Şifre">
+                    <button onclick="handleLogin()" class="w-full py-4 bg-white text-black rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-[0_0_20px_rgba(255,255,255,0.3)] mt-4">Sisteme Gir</button>
+                </div>
+
+                <div id="registerForm" class="hidden space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="mb-4">
+                        <p class="text-[10px] text-slate-400 uppercase font-bold mb-2 text-center">Profil Avatarı Seç</p>
+                        <div class="flex justify-center gap-3" id="avatarList"></div>
+                    </div>
+                    <input type="text" id="regUser" class="auth-input" placeholder="Kullanıcı Adı">
+                    <input type="password" id="regPass" class="auth-input" placeholder="Şifre">
+                    <input type="text" id="regRef" class="auth-input border-dashed border-indigo-500/30" placeholder="Referans Kodu (Opsiyonel)">
+                    <button onclick="handleRegister()" class="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(79,70,229,0.4)] mt-4">Hesap Oluştur</button>
                 </div>
             </div>
         </div>
 
-        <main class="px-6 flex-1 overflow-y-auto pb-40 scroll-smooth snap-y snap-mandatory scroll-pt-6 min-h-0">
-            <h3 class="text-lg font-bold mb-4 text-white/90 sticky top-0 bg-transparent backdrop-blur-sm py-2 z-10">Apps</h3>
-            <div id="grid-container" class="grid grid-cols-2 gap-4"></div>
-        </main>
-
-        <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/10 z-50 pb-safe">
-            <div class="max-w-md mx-auto flex justify-around items-center h-16 px-2">
-                <a href="#" class="flex flex-col items-center justify-center w-16 text-indigo-400">
-                    <i class="fas fa-home text-xl mb-1"></i>
-                    <span class="text-[10px]">Hub</span>
-                </a>
-                <a href="#" class="flex flex-col items-center justify-center w-16 text-gray-500 hover:text-white transition">
-                    <i class="fas fa-chart-pie text-xl mb-1"></i>
-                    <span class="text-[10px]">Portfolio</span>
-                </a>
-                <div class="relative -top-5">
-                    <button onclick="openSettings()" class="w-14 h-14 bg-gradient-to-tr from-pink-500 to-indigo-600 rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center text-white transform transition active:scale-95">
-                        <i class="fas fa-cog text-xl"></i>
-                    </button>
-                </div>
-                <a href="#" class="flex flex-col items-center justify-center w-16 text-gray-500 hover:text-white transition">
-                    <i class="fas fa-bell text-xl mb-1"></i>
-                    <span class="text-[10px]">Announcements</span>
-                </a>
-                <a href="#" class="flex flex-col items-center justify-center w-16 text-gray-500 hover:text-white transition">
-                    <i class="fas fa-wallet text-xl mb-1"></i>
-                    <span class="text-[10px]">Wallet</span>
-                </a>
-            </div>
-        </nav>
-    </div>
-
-    <div id="settings-modal" class="fixed inset-0 z-[60] bg-black/95 transform translate-y-full transition-transform duration-300 ease-in-out flex flex-col">
-        <div class="px-6 pt-12 pb-4 flex justify-between items-center bg-black/50 backdrop-blur-lg border-b border-white/10">
-            <h2 class="text-2xl font-bold">Hub Management</h2>
-            <button onclick="closeSettings()" class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="flex-1 overflow-y-auto p-6 space-y-8">
-            <div class="glass-panel p-4 rounded-xl border border-white/5 mb-6">
-                <h3 class="text-indigo-400 text-sm font-bold mb-3 uppercase tracking-wider">General Settings</h3>
-                <label class="block text-[10px] text-gray-500 uppercase">Top Left Profile URL</label>
-                <input type="text" id="global-profile-url" class="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-blue-300 text-xs focus:border-indigo-500 outline-none mt-1" placeholder="https://...">
-            </div>
-
-            <p class="text-gray-400 text-xs uppercase tracking-wider font-bold">Application Cards</p>
-            <form id="settings-form" class="space-y-6"></form>
-            <div class="h-20"></div>
-        </div>
-        <div class="p-6 border-t border-white/10 bg-black/90 backdrop-blur-md pb-10">
-            <button onclick="saveSettings()" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold py-4 rounded-xl shadow-lg shadow-indigo-500/30 active:scale-[0.98] transition">Save Changes</button>
-            <button onclick="resetDefaults()" class="w-full mt-3 py-3 text-red-400 text-sm font-medium opacity-80 hover:opacity-100">Reset to Defaults</button>
-        </div>
-    </div>
-
-    <div id="transition-overlay" class="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center text-center">
-        <div class="absolute inset-0 bg-gradient-to-br opacity-40 transition-colors duration-700" id="transition-bg"></div>
-        <div class="relative z-10 p-8">
-            <div id="transition-emoji" class="text-8xl mb-6 transform scale-0 opacity-0 transition-all duration-500"></div>
-            <h2 id="transition-title" class="text-4xl font-bold text-white mb-2 transform translate-y-10 opacity-0 transition-all duration-500 delay-100"></h2>
-            <div class="w-16 h-1 bg-white/50 mx-auto rounded-full mt-4 transform scale-x-0 transition-all duration-500 delay-200" id="transition-line"></div>
-            <p class="text-white/60 mt-4 text-sm animate-pulse">Navigating...</p>
-        </div>
-    </div>
-
-    <div id="module-view" class="fixed inset-0 z-[110] bg-black/95 hidden flex flex-col max-w-md mx-auto w-full h-full">
-        <header class="p-6 flex justify-between items-center flex-shrink-0 glass-panel border-b-0 rounded-b-xl">
-            <button onclick="closeModuleView()" class="text-lg text-white/80 hover:text-white transform active:scale-95 transition">
-                <i class="fas fa-arrow-left mr-2"></i>Back to Hub
-            </button>
-            <div class="flex items-center space-x-2">
-                <span id="module-emoji" class="text-xl"></span>
-                <h1 id="module-title" class="text-xl font-bold"></h1>
-            </div>
-        </header>
-        <div class="relative flex-1 text-gray-300 flex flex-col">
-            <div id="module-color" class="absolute inset-0"></div>
-            <div id="module-content" class="relative z-10 flex-1 overflow-y-auto">
-            </div>
-        </div>
-    </div>
-
-
-    <script>
-        const defaultApps = [
-            { id: 'airdrop', title: 'Airdrop', subtitle: 'Earn Token', emoji: '🪂', url: 'https://tetrafundtoken.com/beta/airdrop', colorStart: 'from-blue-500', colorEnd: 'to-cyan-400' },
-            { id: 'game', title: 'TetraGame', subtitle: 'Play & Earn', emoji: '🕹️', url: 'https://tetrafundtoken.com/beta/tetragames', colorStart: 'from-purple-500', colorEnd: 'to-pink-500' },
-            { id: 'social', title: 'TetraSocial', subtitle: 'Community', emoji: '🌐', url: 'https://tetrafundtoken.com/beta/tetrasocial', colorStart: 'from-indigo-500', colorEnd: 'to-blue-600' },
-            { id: 'staking', title: 'Staking', subtitle: '120% APY', emoji: '💎', url: 'https://tetrafundtoken.com/beta/staking', colorStart: 'from-emerald-500', colorEnd: 'to-teal-400' },
-            { id: 'swap', title: 'Swap', subtitle: 'Quick Swap', emoji: '⚡', url: 'https://tetrafundtoken.com/beta/swap', colorStart: 'from-orange-500', colorEnd: 'to-yellow-400' },
-            { id: 'profile', title: 'Profile', subtitle: 'ID', emoji: '👤', url: 'https://tetrafundtoken.com/beta/profile', colorStart: 'from-gray-600', colorEnd: 'to-gray-800' }
-        ];
-
-        const mockUser = {
-            isLoggedIn: true,
-            firstName: 'Super',
-            lastName: 'User',
-            profilePic: '', 
-            isOnline: true
-        };
-
-        let apps = JSON.parse(localStorage.getItem('tetraHubApps')) || JSON.parse(JSON.stringify(defaultApps));
-        let globalProfileUrl = localStorage.getItem('tetraHubProfileUrl') || '#profile';
-        let navigationTimeout;
-
-        function updateProfileUI() {
-            const displayName = document.getElementById('user-display-name');
-            const profileImage = document.getElementById('profile-image');
-            const onlineStatus = document.getElementById('online-status');
-            
-            if (mockUser.isLoggedIn) {
-                displayName.innerText = `${mockUser.firstName} ${mockUser.lastName}`;
-
-                let imageUrl = '';
-                if (mockUser.profilePic && mockUser.profilePic.startsWith('http')) {
-                    imageUrl = mockUser.profilePic;
-                } else {
-                    const initials = `${mockUser.firstName.charAt(0)}${mockUser.lastName.charAt(0)}`;
-                    imageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(initials)}&background=a78bfa&color=fff&size=40&bold=true`;
-                }
-                profileImage.src = imageUrl;
-            } else {
-                displayName.innerText = 'Guest';
-                profileImage.src = 'https://ui-avatars.com/api/?name=GH&background=0D0D0D&color=fff';
-            }
-            
-            onlineStatus.className = `absolute top-0 right-0 w-3 h-3 rounded-full border-2 border-black ${mockUser.isOnline ? 'bg-green-500' : 'bg-gray-500'}`;
-        }
-
-        function renderGrid() {
-            const container = document.getElementById('grid-container');
-            container.innerHTML = '';
-            apps.forEach((app) => {
-                const card = document.createElement('div');
-                card.onclick = (e) => triggerTransition(e, app);
-                card.className = `glass-card p-4 rounded-2xl flex flex-col justify-between h-36 relative overflow-hidden group snap-start cursor-pointer hover:border-white/20`;
-                card.innerHTML = `
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${app.colorStart} ${app.colorEnd} opacity-20 blur-xl rounded-full -mr-4 -mt-4 group-hover:opacity-30 transition duration-500"></div>
-                    <div class="z-10 w-10 h-10 rounded-full bg-gradient-to-br ${app.colorStart} ${app.colorEnd} flex items-center justify-center text-xl shadow-lg mb-2 transform group-hover:scale-110 transition duration-300">${app.emoji}</div>
-                    <div class="z-10"><h4 class="font-bold text-lg leading-tight text-white group-hover:text-indigo-200 transition">${app.title}</h4><p class="text-xs text-gray-400 mt-1">${app.subtitle}</p></div>
-                    <div class="absolute bottom-3 right-3 text-white/10 group-hover:text-white/30 transition transform group-hover:translate-x-1"><i class="fas fa-chevron-right"></i></div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function triggerTransition(event, app) {
-            const overlay = document.getElementById('transition-overlay');
-            const bg = document.getElementById('transition-bg');
-            const emoji = document.getElementById('transition-emoji');
-            const title = document.getElementById('transition-title');
-            const line = document.getElementById('transition-line');
-
-            emoji.classList.remove('scale-100', 'opacity-100'); emoji.classList.add('scale-0', 'opacity-0');
-            title.classList.remove('translate-y-0', 'opacity-100'); title.classList.add('translate-y-10', 'opacity-0');
-            line.classList.remove('scale-x-100'); line.classList.add('scale-x-0');
-
-            emoji.innerText = app.emoji;
-            title.innerText = app.title;
-            bg.className = `absolute inset-0 bg-gradient-to-br opacity-90 ${app.colorStart} ${app.colorEnd}`;
-            overlay.classList.add('active');
-            
-            setTimeout(() => { emoji.classList.remove('scale-0', 'opacity-0'); emoji.classList.add('scale-100', 'opacity-100'); }, 100);
-            setTimeout(() => { title.classList.remove('translate-y-10', 'opacity-0'); title.classList.add('translate-y-0', 'opacity-100'); }, 200);
-            setTimeout(() => { line.classList.remove('scale-x-0'); line.classList.add('scale-x-100'); }, 300);
-            
-            clearTimeout(navigationTimeout); 
-            
-            navigationTimeout = setTimeout(() => { 
-                if (app.url !== '#') {
-                    openModuleView(app);
-                } else {
-                    closeTransition(); 
-                }
-            }, 1500);
-        }
-
-        function openModuleView(app) {
-            const moduleView = document.getElementById('module-view');
-            const moduleContent = document.getElementById('module-content');
-            
-            document.getElementById('module-title').innerText = app.title;
-            document.getElementById('module-emoji').innerText = app.emoji;
-            document.getElementById('module-color').className = `absolute inset-0 bg-gradient-to-br ${app.colorStart} ${app.colorEnd} opacity-10`;
-
-            const isExternal = app.url.startsWith('http');
-
-            if (isExternal) {
-                moduleContent.innerHTML = `<iframe src="${app.url}" class="w-full h-full border-0 rounded-none bg-black"></iframe>`;
-                moduleContent.classList.remove('p-6');
-            } else {
-                moduleContent.innerHTML = `
-                    <div class="p-4 border border-white/10 rounded-xl glass-panel text-center mb-6">
-                        <p class="text-2xl font-semibold mb-2">Simulated App Content</p>
-                        <p class="text-sm">This is where the actual content for <span class="text-indigo-400 font-medium">${app.title}</span> module would be loaded.</p>
-                        <div class="mt-4 p-3 bg-white/5 rounded-lg text-xs">
-                            <p class="font-mono text-gray-400">Internal Target: ${app.url}</p>
+        <header class="pt-[calc(1.5rem+var(--safe-top))] px-6 flex flex-col gap-4 z-[50] relative">
+            <div class="flex justify-between items-center bg-slate-900/60 backdrop-blur-xl p-2 pl-3 pr-2 rounded-[2rem] border border-white/10 shadow-xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-black border border-white/20 shadow-xl overflow-hidden flex items-center justify-center relative group">
+                        <img id="userAvatarDisplay" src="" alt="Tetra" class="w-full h-full object-cover">
+                    </div>
+                    <div>
+                        <h1 class="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-tight" id="userNameDisplay">OPERATOR</h1>
+                        <div class="flex items-center gap-2">
+                            <span class="text-white font-luxury text-xs font-bold"><span data-text="level_prefix">SEVİYE</span> <span id="lvlDisplay">1</span></span>
+                            <span id="badgeDisplay" class="badge-premium text-[8px]"></span>
                         </div>
                     </div>
-                    <div class="p-4 border border-white/10 rounded-xl glass-panel">
-                        <h3 class="font-bold mb-3 text-white/90">Module Features</h3>
-                        <ul class="space-y-2 text-sm text-gray-400">
-                            <li class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> Real-time data sync</li>
-                            <li class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> High security level</li>
-                            <li class="flex items-center"><i class="fas fa-check-circle text-green-400 mr-2"></i> Customizable settings</li>
-                        </ul>
+                </div>
+                <button onclick="handleLogout()" class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="aesthetic-card p-3 relative overflow-hidden group">
+                    <div class="absolute -right-2 -top-2 w-10 h-10 bg-emerald-500/20 blur-xl rounded-full"></div>
+                    <p class="text-[8px] text-slate-400 font-bold uppercase mb-1 tracking-wider" data-text="stat_pph_label">Kazanç / Saat</p>
+                    <div class="flex items-center gap-1.5 text-white font-luxury font-bold text-lg"><i data-lucide="zap" class="w-4 h-4 text-emerald-400 fill-emerald-400/20"></i><span id="pphDisplay">0</span></div>
+                </div>
+                <div class="aesthetic-card p-3 relative overflow-hidden">
+                    <div class="absolute -right-2 -top-2 w-10 h-10 bg-indigo-500/20 blur-xl rounded-full"></div>
+                    <div class="flex justify-between items-center mb-1.5"><p class="text-[8px] text-slate-400 font-bold uppercase tracking-wider" data-text="stat_energy_label">Enerji</p><span id="energyText" class="text-[9px] text-white font-luxury">100/100</span></div>
+                    <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden"><div id="energyBar" class="progress-bar-fill w-full shadow-[0_0_10px_#818cf8]"></div></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1 relative flex flex-col justify-center overflow-hidden z-10">
+            <section id="tab-borsa" class="tab-content active px-6 items-center justify-center">
+                <div class="text-center mb-10 animate-in fade-in zoom-in duration-500">
+                    <div class="flex items-center justify-center gap-2 mb-2"><span id="balanceDisplay" class="text-[3.5rem] leading-none font-extrabold font-luxury tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 drop-shadow-2xl">0</span></div>
+                    <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/5 rounded-full border border-white/5"><div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div><p class="text-cyan-100 text-[9px] font-bold tracking-[0.2em] uppercase" data-text="currency_label">Tetra Kredisi</p></div>
+                </div>
+                <div class="relative flex items-center justify-center py-4" onclick="handleTap(event)">
+                    <div class="absolute w-[300px] h-[300px] bg-gradient-to-tr from-cyan-500/10 to-indigo-500/10 blur-[60px] rounded-full animate-pulse"></div>
+                    <div class="core-sphere bg-slate-900/40 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] backdrop-blur-sm z-20 group cursor-pointer select-none">
+                        <div class="absolute inset-0 border border-cyan-500/10 rounded-full group-hover:border-cyan-500/30 transition-colors"></div>
+                        <div class="absolute inset-2 border border-dashed border-white/5 rounded-full animate-[spin_20s_linear_infinite]"></div>
+                        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=tetra" alt="Tetra Core" class="w-48 h-48 object-contain z-10 drop-shadow-[0_0_30px_rgba(207,250,254,0.3)] pointer-events-none transition-transform duration-100 group-active:scale-95">
+                        <div id="lockOverlay" class="absolute inset-0 bg-slate-950/80 backdrop-blur-md rounded-full flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 z-30"><i data-lucide="battery-warning" class="w-10 h-10 text-red-400 mb-2 animate-bounce"></i><p class="text-red-200 font-bold text-[9px] uppercase tracking-widest text-center px-4 leading-relaxed" data-text="energy_empty_text">Batarya Boşaldı...</p></div>
                     </div>
-                    <div class="h-10"></div>
-                `;
-                moduleContent.classList.add('p-6');
+                </div>
+                <div class="w-full mt-12 max-w-[280px]">
+                    <div class="flex justify-between items-end mb-2"><span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider" data-text="progression_label">Sistem Yükseltmesi</span><span id="progressText" class="text-[9px] text-cyan-300 font-luxury font-bold">0.0%</span></div>
+                    <div class="h-1 bg-slate-800 rounded-full overflow-hidden"><div id="progressBar" class="progress-bar-fill w-0 shadow-[0_0_10px_#22d3ee]"></div></div>
+                </div>
+            </section>
+
+            <section id="tab-market" class="tab-content px-6 pt-4 pb-32">
+                <header class="mb-6 sticky top-0 z-30 pt-2 -mx-2">
+                    <div class="aesthetic-card p-4 bg-gradient-to-r from-slate-900/95 to-indigo-950/90 border border-white/10 backdrop-blur-xl shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-40 h-full bg-gradient-to-l from-cyan-500/10 to-transparent pointer-events-none"></div>
+                        <div class="flex items-center justify-between relative z-10">
+                            <div><h2 class="text-xl font-extrabold font-luxury text-white tracking-tight flex items-center gap-2"><span class="w-1 h-5 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]"></span><span data-text="market_title">Yatırım Terminali</span></h2><p class="text-[10px] text-slate-400 mt-1 font-medium tracking-wide pl-3 border-l border-white/5 ml-0.5 leading-none" data-text="market_desc">Pasif gelir ağını yönet</p></div>
+                            <div class="w-10 h-10 rounded-xl bg-slate-800/50 border border-white/10 flex items-center justify-center shadow-inner group"><i data-lucide="monitor-smartphone" class="w-5 h-5 text-cyan-400 group-hover:text-white transition-colors"></i></div>
+                        </div>
+                    </div>
+                </header>
+                <div id="upgradesList" class="space-y-4 custom-scroll"></div>
+            </section>
+
+            <section id="tab-ekip" class="tab-content px-6 pt-6 pb-32">
+                <header class="mb-8 text-center"><h2 class="text-2xl font-extrabold font-luxury text-white" data-text="ekip_title">Ekip Ağı</h2></header>
+                <div class="aesthetic-card p-6 mb-6 text-center bg-gradient-to-br from-slate-800/40 to-indigo-900/20">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase mb-4 tracking-widest" data-text="ref_code_label">Operatör ID</p>
+                    <div class="bg-black/30 border border-dashed border-white/10 rounded-xl p-4 mb-4 relative overflow-hidden group cursor-pointer" onclick="copyCode()">
+                        <div class="absolute inset-0 bg-indigo-500/10 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div><div class="text-3xl font-bold font-luxury text-indigo-300 tracking-[0.2em]" id="refCodeDisplay">...</div>
+                    </div>
+                    <button onclick="copyCode()" class="w-full py-4 bg-white text-slate-950 rounded-xl font-extrabold text-xs uppercase hover:bg-slate-200 active:scale-95 transition-all shadow-lg shadow-white/10"><span data-text="btn_copy">ID Kopyala</span></button>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 pl-2 border-l-2 border-cyan-500" data-text="lbl_linked_operators">Bağlı Operatörler</h3>
+                    <div id="referralList" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <section id="tab-liderler" class="tab-content px-6 pt-6 pb-32">
+                <header class="mb-6"><h2 class="text-2xl font-extrabold font-luxury text-white text-center mb-1" data-text="lb_header_title">Elit Operatörler</h2><p class="text-[10px] text-slate-500 text-center uppercase tracking-widest" data-text="lb_header_subtitle">Global Sıralama</p></header>
+                <div class="flex p-1 bg-white/5 rounded-xl mb-6">
+                    <button onclick="switchLeaderboardTab('balance')" id="lb-tab-balance" class="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase bg-white/10 text-white transition-all" data-text="lb_tab_balance">En Zenginler</button>
+                    <button onclick="switchLeaderboardTab('badge')" id="lb-tab-badge" class="flex-1 py-2 rounded-lg text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-all" data-text="lb_tab_badge">Ağ Liderleri</button>
+                </div>
+                <div id="leaderboardList" class="space-y-3 custom-scroll"></div>
+            </section>
+
+            <section id="tab-cuzdan" class="tab-content px-6 pt-6 pb-32">
+                <header class="mb-6 text-center">
+                    <h2 class="text-2xl font-extrabold font-luxury text-white tracking-tight" data-text="wallet_title">Varlık Yönetimi</h2>
+                </header>
+                
+                <div class="flex flex-col gap-4 mb-8 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <div class="aesthetic-card p-8 bg-gradient-to-br from-slate-800/60 to-slate-950/90 border-white/10 relative overflow-hidden">
+                        <div class="absolute -right-10 -top-10 w-48 h-48 bg-cyan-500/10 blur-[80px] rounded-full"></div>
+                        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-indigo-500/5 blur-[60px] rounded-full"></div>
+                        
+                        <div class="flex flex-col items-center justify-center relative z-10">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em] mb-3">Kullanılabilir Bakiye</p>
+                            <h3 class="text-5xl font-extrabold font-luxury text-white tracking-tighter flex items-center gap-3 drop-shadow-[0_0_20px_rgba(34,211,238,0.2)]">
+                                <span id="tokenBalanceDisplay">0</span> 
+                                <span class="text-sm text-cyan-400 font-normal uppercase tracking-widest">Tetra</span>
+                            </h3>
+                            
+                            <div id="walletAddressSection" class="mt-6 px-4 py-2 bg-black/40 border border-white/5 rounded-full flex items-center gap-3 opacity-0 transition-all duration-700">
+                                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span id="walletAddressText" class="text-[9px] text-slate-300 font-mono tracking-wider">0x...</span>
+                                <i data-lucide="shield-check" class="w-3 h-3 text-emerald-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="aesthetic-card p-4 bg-white/5 border-white/5">
+                            <p class="text-[8px] text-slate-500 uppercase font-extrabold mb-1 tracking-widest">Saatlik Üretim</p>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="zap" class="w-4 h-4 text-cyan-400"></i>
+                                <span id="walletPphDisplay" class="text-lg font-bold font-luxury text-white">0</span>
+                            </div>
+                        </div>
+                        <div class="aesthetic-card p-4 bg-white/5 border-white/5">
+                            <p class="text-[8px] text-slate-500 uppercase font-extrabold mb-1 tracking-widest">Günlük Tahmini</p>
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="clock" class="w-4 h-4 text-emerald-400"></i>
+                                <span id="dailyYieldDisplay" class="text-lg font-bold font-luxury text-white">0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="aesthetic-card p-4 bg-indigo-950/20 border-indigo-500/10">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[8px] text-slate-500 uppercase font-extrabold mb-1 tracking-widest">Ağ & Referans Bonusu</p>
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="users" class="w-4 h-4 text-indigo-400"></i>
+                                    <span id="refHourlyDisplay" class="text-base font-bold text-indigo-200">0</span>
+                                    <span class="text-[8px] text-indigo-500 font-bold uppercase">Pts/sa</span>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[8px] text-slate-500 uppercase font-extrabold mb-1 tracking-widest">Dönüşüm Oranı</p>
+                                <span id="exchangeRateLabel" class="text-[10px] text-white font-mono font-bold">1000 Pts = 1 TETRA</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-4 mt-auto">
+                    <div class="flex items-center justify-between px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" data-text="wallet_status">Sistem Durumu</span>
+                        <div class="flex items-center gap-2">
+                            <span id="walletStatusText" class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Offline</span>
+                            <div id="statusDot" class="w-1.5 h-1.5 rounded-full bg-slate-600"></div>
+                        </div>
+                    </div>
+                    
+                    <button id="connectWalletBtn" onclick="connectWallet()" class="w-full py-5 bg-white text-black hover:bg-slate-200 rounded-[2rem] font-extrabold text-xs uppercase tracking-[0.2em] shadow-[0_0_30px_rgba(255,255,255,0.1)] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="link-2" class="w-5 h-5"></i>
+                        <span data-text="btn_connect_wallet">Cüzdan Bağla</span>
+                    </button>
+                    
+                    <button id="transferTokensBtn" onclick="transferTokens()" class="w-full py-5 bg-slate-900 border border-white/10 text-white hover:bg-slate-800 rounded-[2rem] font-extrabold text-xs uppercase tracking-[0.2em] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+                        <i data-lucide="arrow-down-to-line" class="w-5 h-5 text-cyan-400"></i>
+                        <span data-text="btn_transfer">Token Çek</span>
+                    </button>
+                    
+                    <p class="text-[9px] text-slate-600 text-center uppercase tracking-widest font-bold">Minimum Para Çekme Limiti: 5.000 Tetra</p>
+                </div>
+            </section>
+        </main>
+
+        <footer class="pb-[calc(1.5rem+var(--safe-bottom))] px-4 pt-2 z-[100] relative">
+            <div class="aesthetic-card py-3 px-1 flex justify-between items-center bg-[#0f172a]/90 backdrop-blur-md border border-white/10 shadow-2xl">
+                <button onclick="switchTab('borsa')" class="nav-item flex flex-col items-center gap-1.5 flex-1 active" data-tab="borsa"><i data-lucide="zap" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase tracking-widest" data-text="nav_borsa">Borsa</span></button>
+                <button onclick="switchTab('market')" class="nav-item flex flex-col items-center gap-1.5 flex-1" data-tab="market"><i data-lucide="bar-chart-3" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase tracking-widest" data-text="nav_market">Market</span></button>
+                <button onclick="switchTab('ekip')" class="nav-item flex flex-col items-center gap-1.5 flex-1" data-tab="ekip"><i data-lucide="users" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase tracking-widest" data-text="nav_ekip">Ekip</span></button>
+                <button onclick="switchTab('liderler')" class="nav-item flex flex-col items-center gap-1.5 flex-1" data-tab="liderler"><i data-lucide="trophy" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase tracking-widest" data-text="nav_liderler">Liderler</span></button>
+                <button onclick="switchTab('cuzdan')" class="nav-item flex flex-col items-center gap-1.5 flex-1" data-tab="cuzdan"><i data-lucide="wallet" class="w-5 h-5"></i><span class="text-[8px] font-bold uppercase tracking-widest" data-text="nav_cuzdan">Cüzdan</span></button>
+            </div>
+        </footer>
+
+        <div id="adModal" class="fixed inset-0 z-[2000] hidden flex-col items-center justify-center bg-black/95 backdrop-blur-xl"><div class="scan-line"></div><div class="relative z-10 text-center p-8 max-w-xs w-full"><div class="w-20 h-20 bg-indigo-500/10 rounded-full border border-indigo-500/50 flex items-center justify-center mx-auto mb-6 relative"><div class="absolute inset-0 border-t-2 border-indigo-400 rounded-full animate-spin"></div><i data-lucide="satellite-dish" class="w-8 h-8 text-indigo-400 animate-pulse"></i></div><h3 class="text-2xl font-bold font-luxury text-white mb-2 glitch-text" data-text="modal_title">Sinyal Çözümleniyor</h3><div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden mb-4"><div id="adTimerBar" class="h-full bg-indigo-500 w-0"></div></div></div></div>
+    </div>
+
+    <script>
+        // --- AUTH & STATE MANAGEMENT ---
+        let currentUser = null; 
+        let usersDB = []; 
+
+        const defaultState = {
+            balance: 0, totalEarned: 0, basePPH: 0, level: 1, energy: 100, maxEnergy: 500,
+            baseTapValue: 1, tapMultiplier: 1.0, regenRate: 1, referralCount: 0,
+            referralCode: "", referralPrefix: "TETRA-", isWalletConnected: false,
+            walletAddress: "0x" + Math.random().toString(16).slice(2, 10).toUpperCase() + "..." + Math.random().toString(16).slice(2, 6).toUpperCase(),
+            adWatchCounts: {}, currentBadge: "ACEMİ", referralList: [], last_updated: 0,
+            ip_address: "127.0.0.1", totalTransferred: 0, isBanned: false
+        };
+        
+        const defaultUpgrades = [ 
+            { id: 1, name: 'Veri Analizi', cost: 500, pph: 100, icon: 'bar-chart-2', d: 'Basit piyasa algoritmaları.' },
+            { id: 2, name: 'GPU Madenciliği', cost: 2000, pph: 450, icon: 'cpu', d: 'Güçlü grafik işlemciler.' },
+            { id: 3, name: 'Sıvı Soğutma', cost: 7500, pph: 1400, icon: 'droplet', d: 'Sistemi stabil tutar.' }
+        ];
+        
+        let globalConfig = { minTransferTokens: 5000, adMaxLimit: 20, exchangeRate: 1000 };
+        let appTexts = {}; 
+        let badges = [ { level: 1, name: "ACEMİ" }, { level: 5, name: "PİLOT" }, { level: 10, name: "KAPTAN" }, { level: 20, name: "KOMUTAN" }, { level: 50, name: "ELİT" } ]; 
+        let upgrades = []; let leaderboardBotData = [];
+        let currentLeaderboardTab = 'balance';
+        let selectedAvatarSeed = "tetra";
+
+        const avatarSeeds = ["tetra", "delta", "alpha", "omega", "cyber", "neon", "flux", "void"];
+
+        function init() {
+            loadGlobalData();
+            loadUsersDB();
+            initAvatarPicker();
+            
+            const sessionUser = localStorage.getItem('tetra_current_user');
+            if (sessionUser) {
+                const user = usersDB.find(u => u.username === sessionUser);
+                if (user && !user.state.isBanned) {
+                    loginUser(user);
+                } else {
+                    document.getElementById('authScreen').style.display = 'flex';
+                }
+            } else {
+                document.getElementById('authScreen').style.display = 'flex';
             }
 
-            document.getElementById('app').style.display = 'none';
-            setTimeout(closeTransition, 600);
-            moduleView.classList.remove('hidden');
+            lucide.createIcons();
+            setInterval(gameLoop, 1000);
+            setInterval(saveCurrentUser, 5000); 
+            setInterval(syncWithServer, 2000);
         }
 
-        function closeModuleView() {
-            document.getElementById('module-view').classList.add('hidden');
-            document.getElementById('app').style.display = 'flex';
+        function syncWithServer() {
+            const savedUpgrades = localStorage.getItem('tetra_upgrades_v9');
+            if (savedUpgrades && JSON.stringify(upgrades) !== savedUpgrades) {
+                upgrades = JSON.parse(savedUpgrades);
+                renderUpgrades();
+            }
+            
+            const savedTexts = localStorage.getItem('tetra_texts_v9');
+            if (savedTexts && JSON.stringify(appTexts) !== savedTexts) {
+                appTexts = JSON.parse(savedTexts);
+                applyTextsToUI();
+            }
+
+            if(!currentUser) return;
+            const dbRaw = localStorage.getItem('tetra_users_db');
+            if(dbRaw) {
+                const db = JSON.parse(dbRaw);
+                const remoteUser = db.find(u => u.username === currentUser.username);
+                if(!remoteUser) {
+                     localStorage.removeItem('tetra_current_user');
+                     location.reload();
+                     return;
+                }
+            }
         }
 
-        function cancelTransition() {
-            clearTimeout(navigationTimeout); 
-            closeTransition();
-            showToast('Navigation Cancelled.');
+        function loadUsersDB() {
+            const db = localStorage.getItem('tetra_users_db');
+            if(db) usersDB = JSON.parse(db);
         }
 
-        function closeTransition() {
-            const overlay = document.getElementById('transition-overlay');
-            overlay.classList.remove('active');
-            setTimeout(() => {
-                const emoji = document.getElementById('transition-emoji');
-                const title = document.getElementById('transition-title');
-                const line = document.getElementById('transition-line');
-                emoji.classList.add('scale-0', 'opacity-0'); emoji.classList.remove('scale-100', 'opacity-100');
-                title.classList.add('translate-y-10', 'opacity-0'); title.classList.remove('translate-y-0', 'opacity-100');
-                line.classList.add('scale-x-0'); line.classList.remove('scale-x-100');
-            }, 600);
+        function saveUsersDB() {
+            localStorage.setItem('tetra_users_db', JSON.stringify(usersDB));
         }
 
-        function renderSettingsForm() {
-            document.getElementById('global-profile-url').value = globalProfileUrl;
-            const form = document.getElementById('settings-form');
-            form.innerHTML = '';
-            const colorOptions = [
-                { name: 'Blue/Cyan', start: 'from-blue-500', end: 'to-cyan-400' },
-                { name: 'Purple/Pink', start: 'from-purple-500', end: 'to-pink-500' },
-                { name: 'Green/Teal', start: 'from-emerald-500', end: 'to-teal-400' },
-                { name: 'Orange/Yellow', start: 'from-orange-500', end: 'to-yellow-400' },
-                { name: 'Indigo/Blue', start: 'from-indigo-500', end: 'to-blue-600' },
-                { name: 'Red/Rose', start: 'from-rose-500', end: 'to-red-600' },
-                { name: 'Grey/Black', start: 'from-gray-600', end: 'to-gray-800' },
-            ];
-
-            apps.forEach((app, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'glass-panel p-4 rounded-xl border border-white/5';
-                let colorSelectHTML = `<select id="color-${index}" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-xs text-white outline-none focus:border-indigo-500 mt-1">`;
-                colorOptions.forEach(opt => {
-                    const selected = (opt.start === app.colorStart) ? 'selected' : '';
-                    colorSelectHTML += `<option value="${opt.start}|${opt.end}" ${selected}>${opt.name}</option>`;
-                });
-                colorSelectHTML += `</select>`;
-
-                itemDiv.innerHTML = `
-                    <div class="flex justify-between items-center mb-3">
-                        <span class="text-sm font-bold text-indigo-300">#${index + 1} ${app.id.toUpperCase()}</span>
-                        <div class="w-6 h-6 rounded-full bg-gradient-to-br ${app.colorStart} ${app.colorEnd}"></div>
-                    </div>
-                    <div class="grid grid-cols-4 gap-3 mb-3">
-                        <div class="col-span-1"><label class="block text-[10px] text-gray-500 uppercase">Emoji</label><input type="text" id="emoji-${index}" value="${app.emoji}" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-center text-white focus:border-indigo-500 outline-none"></div>
-                        <div class="col-span-3"><label class="block text-[10px] text-gray-500 uppercase">Title</label><input type="text" id="title-${index}" value="${app.title}" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-white focus:border-indigo-500 outline-none"></div>
-                    </div>
-                    <div class="mb-3"><label class="block text-[10px] text-gray-500 uppercase">Subtitle</label><input type="text" id="subtitle-${index}" value="${app.subtitle}" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-white focus:border-indigo-500 outline-none"></div>
-                    <div class="mb-3"><label class="block text-[10px] text-gray-500 uppercase">URL (Link)</label><input type="text" id="url-${index}" value="${app.url}" class="w-full bg-black/50 border border-white/10 rounded-lg p-2 text-blue-300 text-xs focus:border-indigo-500 outline-none"></div>
-                    <div><label class="block text-[10px] text-gray-500 uppercase">Theme Color</label>${colorSelectHTML}</div>
-                `;
-                form.appendChild(itemDiv);
-            });
+        function initAvatarPicker() {
+            const list = document.getElementById('avatarList');
+            list.innerHTML = avatarSeeds.map(seed => `
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=${seed}" 
+                     class="avatar-option ${seed === selectedAvatarSeed ? 'selected' : ''}" 
+                     onclick="selectAvatar('${seed}')">
+            `).join('');
         }
 
-        function openSettings() { renderSettingsForm(); document.getElementById('settings-modal').classList.remove('translate-y-full'); }
-        function closeSettings() { document.getElementById('settings-modal').classList.add('translate-y-full'); }
+        function selectAvatar(seed) {
+            selectedAvatarSeed = seed;
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function toggleAuthMode(mode) {
+            document.getElementById('tabLogin').className = mode === 'login' ? "flex-1 py-3 rounded-lg text-xs font-bold uppercase bg-indigo-600 text-white shadow-lg transition-all" : "flex-1 py-3 rounded-lg text-xs font-bold uppercase text-slate-400 hover:text-white transition-all";
+            document.getElementById('tabRegister').className = mode === 'register' ? "flex-1 py-3 rounded-lg text-xs font-bold uppercase bg-indigo-600 text-white shadow-lg transition-all" : "flex-1 py-3 rounded-lg text-xs font-bold uppercase text-slate-400 hover:text-white transition-all";
+            if(mode === 'login') { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); } 
+            else { document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); }
+        }
+
+        function handleRegister() {
+            const u = document.getElementById('regUser').value.trim();
+            const p = document.getElementById('regPass').value.trim();
+            const ref = document.getElementById('regRef').value.trim();
+
+            if(!u || !p) return showToast("Kullanıcı adı ve şifre zorunlu!");
+            if(usersDB.find(x => x.username === u)) return showToast("Bu kullanıcı adı alınmış!");
+
+            loadUsersDB(); 
+            let startBalance = 0;
+            if(ref) {
+                const referrerIndex = usersDB.findIndex(x => x.state.referralCode === ref);
+                if(referrerIndex !== -1) {
+                    const referrer = usersDB[referrerIndex];
+                    referrer.state.referralCount++;
+                    const bonus = Math.max(5000, referrer.state.basePPH * 500);
+                    referrer.state.balance += bonus;
+                    referrer.state.referralList.push({ name: u, score: 0, active: true });
+                    startBalance = 5000;
+                    showToast("Referans doğrulandı!");
+                }
+            }
+
+            const newUser = {
+                username: u, password: p,
+                avatar: `https://api.dicebear.com/7.x/bottts/svg?seed=${selectedAvatarSeed}`,
+                state: JSON.parse(JSON.stringify(defaultState))
+            };
+            
+            newUser.state.balance = startBalance;
+            newUser.state.referralCode = newUser.state.referralPrefix + Math.random().toString(36).substr(2, 4).toUpperCase();
+            usersDB.push(newUser);
+            saveUsersDB(); 
+            loginUser(newUser);
+        }
+
+        function handleLogin() {
+            const u = document.getElementById('loginUser').value.trim();
+            const p = document.getElementById('loginPass').value.trim();
+            loadUsersDB(); 
+            const user = usersDB.find(x => x.username === u && x.password === p);
+            if(user) {
+                if(user.state.isBanned) return showToast("Bu hesap askıya alınmıştır.");
+                loginUser(user);
+            }
+            else showToast("Hatalı kullanıcı adı veya şifre!");
+        }
+
+        function loginUser(user) {
+            currentUser = user;
+            localStorage.setItem('tetra_current_user', user.username);
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('userNameDisplay').innerText = user.username;
+            document.getElementById('userAvatarDisplay').src = user.avatar;
+            renderUpgrades(); 
+            checkBadge();
+            updateUI();
+            showToast(`Hoş geldin, ${user.username}`);
+        }
+
+        function handleLogout() {
+            saveCurrentUser();
+            currentUser = null;
+            localStorage.removeItem('tetra_current_user');
+            location.reload(); 
+        }
+
+        function saveCurrentUser() {
+            if(!currentUser) return;
+            const dbRaw = localStorage.getItem('tetra_users_db');
+            if(dbRaw) usersDB = JSON.parse(dbRaw);
+            const idx = usersDB.findIndex(u => u.username === currentUser.username);
+            if(idx !== -1) { 
+                usersDB[idx].state = currentUser.state; 
+                saveUsersDB(); 
+            }
+        }
+
+        function loadGlobalData() {
+            const savedState = localStorage.getItem('tetra_state_v9');
+            const savedUpgrades = localStorage.getItem('tetra_upgrades_v9');
+            const savedTexts = localStorage.getItem('tetra_texts_v9');
+            const savedBadges = localStorage.getItem('tetra_badges_v9');
+
+            if (savedState) {
+                 const parsed = JSON.parse(savedState);
+                 globalConfig = { ...globalConfig, ...parsed }; 
+                 if(parsed.leaderboard) leaderboardBotData = parsed.leaderboard;
+            }
+            
+            if (savedUpgrades) upgrades = JSON.parse(savedUpgrades);
+            else { upgrades = defaultUpgrades; localStorage.setItem('tetra_upgrades_v9', JSON.stringify(upgrades)); }
+
+            if (savedTexts) appTexts = JSON.parse(savedTexts);
+            else appTexts = { header_title: "Tetra Operator", level_prefix: "SEVİYE", stat_pph_label: "Kazanç / Saat", stat_energy_label: "Enerji", currency_label: "Tetra Kredisi", energy_empty_text: "Yükleniyor...", progression_label: "Sistem Yükseltmesi", market_title: "Yatırım Terminali", market_desc: "Pasif gelir ağını yönet", ekip_title: "Ekip Ağı", ref_code_label: "Operatör ID", btn_copy: "ID Kopyala", ekip_members_label: "Aktif Üye", ekip_bonus_label: "Ağ Çarpanı", lbl_linked_operators: "Bağlı Operatörler", status_active: "AKTİF", status_passive: "PASİF", lbl_no_referrals: "Henüz bağlı operatör yok. ID'nizi paylaşın.", nav_liderler: "Liderler", lb_header_title: "Elit Operatörler", lb_header_subtitle: "Global Sıralama", lb_tab_balance: "En Zenginler", lb_tab_badge: "En Çok Referans", wallet_title: "Varlık Yönetimi", wallet_token_balance: "Tetra Token", wallet_daily_yield: "Günlük Tahmini", wallet_status: "Durum", btn_connect_wallet: "Cüzdan Bağla", btn_transfer: "Token Çek", nav_borsa: "Borsa", nav_market: "Market", nav_ekip: "Ekip", nav_cuzdan: "Cüzdan", modal_title: "Sinyal Çözümleniyor", modal_desc: "Veri Paketi İndiriliyor...", btn_signal_text: "Sinyal", btn_claim_free: "ÜCRETSİZ AL", toast_level_up: "SEVİYE ATLANDI!", toast_invest_success: "Yatırım Başarılı!", toast_signal_success: "ALINDI!", toast_wallet_connected: "Cüzdan Doğrulandı", toast_transfer_success: "TETRA Aktarıldı", toast_fake_ref: "Simüle Üye Eklendi", toast_settings_saved: "Ayarlar Kaydedildi", toast_reset: "Veriler Sıfırlandı", status_connected: "Bağlı", status_offline: "Offline", btn_wallet_verified: "Cüzdan Doğrulandı", btn_transfer_processing: "İşleniyor...", lbl_signal_processing: "Sinyal Çözümleme" };
+            
+            if (savedBadges) badges = JSON.parse(savedBadges);
+            applyTextsToUI();
+        }
+
+        function gameLoop() {
+            if(!currentUser) return;
+            const s = currentUser.state;
+            const totalMult = 1 + (s.referralCount * 0.25);
+            const currentPPH = s.basePPH * totalMult;
+            if (currentPPH > 0) {
+                let income = currentPPH / 3600;
+                s.balance += income;
+                s.totalEarned += income;
+            }
+            if (s.energy < s.maxEnergy) s.energy = Math.min(s.maxEnergy, s.energy + s.regenRate);
+            checkLevel();
+            checkBadge();
+            updateUI();
+        }
+
+        function handleTap(e) {
+            if(!currentUser) return;
+            const s = currentUser.state;
+            if (s.energy < 2) return;
+            const totalMult = 1 + (s.referralCount * 0.25);
+            const val = s.baseTapValue * s.tapMultiplier * totalMult * (1 + (s.level * 0.1));
+            s.balance += val;
+            s.totalEarned += val;
+            s.energy -= 2;
+            const p = document.createElement('div'); p.className = 'tap-value'; p.innerText = `+${Math.floor(val)}`;
+            const x = (e.type === 'touchstart' ? e.touches[0].clientX : e.clientX) || window.innerWidth/2;
+            const y = (e.type === 'touchstart' ? e.touches[0].clientY : e.clientY) || window.innerHeight/2;
+            p.style.left = `${x + (Math.random() - 0.5) * 40}px`; p.style.top = `${y}px`;
+            document.body.appendChild(p); setTimeout(() => p.remove(), 800);
+            if (navigator.vibrate) navigator.vibrate(10);
+            updateUI();
+        }
+
+        function updateUI() {
+            if(!currentUser) return;
+            const s = currentUser.state;
+            
+            const refMultBonus = s.referralCount * 0.25;
+            const totalMult = 1 + refMultBonus;
+            const totalPPH = s.basePPH * totalMult;
+            
+            const tokenBal = Math.floor(s.balance / globalConfig.exchangeRate);
+            const dailyPoints = totalPPH * 24;
+            const dailyTokens = Math.floor(dailyPoints / globalConfig.exchangeRate);
+            const refHourlyPts = Math.floor(s.basePPH * refMultBonus);
+
+            document.getElementById('balanceDisplay').innerText = Math.floor(s.balance).toLocaleString();
+            document.getElementById('lvlDisplay').innerText = s.level;
+            document.getElementById('pphDisplay').innerText = Math.floor(totalPPH).toLocaleString();
+            document.getElementById('energyText').innerText = `${Math.floor(s.energy)}/${s.maxEnergy}`;
+            document.getElementById('energyBar').style.width = `${(s.energy / s.maxEnergy) * 100}%`;
+            
+            const nextLevelXP = 500 * Math.pow(2, s.level);
+            const prevLevelXP = s.level === 1 ? 0 : 500 * Math.pow(2, s.level - 1);
+            const progressPercent = Math.min(100, Math.max(0, ((s.totalEarned - prevLevelXP) / (nextLevelXP - prevLevelXP)) * 100)) || 0;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+            document.getElementById('progressText').innerText = `${progressPercent.toFixed(1)}%`;
+
+            const badgeEl = document.getElementById('badgeDisplay');
+            if(s.currentBadge) { badgeEl.innerText = s.currentBadge; badgeEl.style.display = 'inline-flex'; }
+            
+            // Wallet UI Updates
+            const tokenDisp = document.getElementById('tokenBalanceDisplay');
+            if(tokenDisp) tokenDisp.innerText = tokenBal.toLocaleString();
+            
+            const walletPph = document.getElementById('walletPphDisplay');
+            if(walletPph) walletPph.innerText = Math.floor(totalPPH).toLocaleString();
+
+            const dailyDisp = document.getElementById('dailyYieldDisplay');
+            if(dailyDisp) dailyDisp.innerText = dailyTokens.toLocaleString();
+            
+            const refHDisp = document.getElementById('refHourlyDisplay');
+            if(refHDisp) refHDisp.innerText = refHourlyPts.toLocaleString();
+            
+            const rateDisp = document.getElementById('exchangeRateLabel');
+            if(rateDisp) rateDisp.innerText = `${globalConfig.exchangeRate} Pts = 1 TETRA`;
+
+            const statusText = document.getElementById('walletStatusText');
+            const statusDot = document.getElementById('statusDot');
+            const connectBtn = document.getElementById('connectWalletBtn');
+            const addrSection = document.getElementById('walletAddressSection');
+            const addrText = document.getElementById('walletAddressText');
+
+            if (s.isWalletConnected) {
+                if(statusText) statusText.innerText = "Aktif"; 
+                if(statusDot) { statusDot.className = "w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"; }
+                if(connectBtn) {
+                    connectBtn.innerHTML = `<i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i> <span class="text-emerald-500">Cüzdan Bağlı</span>`; 
+                    connectBtn.className = "w-full py-5 bg-emerald-950/10 border border-emerald-500/30 text-emerald-400 rounded-[2rem] font-extrabold text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3";
+                }
+                if(addrSection) addrSection.classList.replace('opacity-0', 'opacity-100');
+                if(addrText) addrText.innerText = s.walletAddress;
+            } else {
+                if(addrSection) addrSection.classList.replace('opacity-100', 'opacity-0');
+            }
+            
+            document.getElementById('lockOverlay').style.opacity = s.energy < 2 ? '1' : '0';
+            updateUpgradeButtonsState();
+        }
+
+        function checkLevel() {
+            if(!currentUser) return;
+            const s = currentUser.state;
+            const nextXP = 500 * Math.pow(2, s.level);
+            if (s.totalEarned >= nextXP) { 
+                s.level++; 
+                showToast(appTexts.toast_level_up); 
+                checkBadge(); 
+            }
+        }
         
-        function saveSettings() {
-            globalProfileUrl = document.getElementById('global-profile-url').value;
-            localStorage.setItem('tetraHubProfileUrl', globalProfileUrl);
+        function checkBadge() {
+             if(!currentUser) return;
+             const s = currentUser.state;
+             if(!badges || badges.length === 0) { s.currentBadge = "ACEMİ"; return; }
+             const eligibleBadges = badges.filter(b => b.level <= s.level);
+             if(eligibleBadges.length > 0) {
+                 const bestBadge = eligibleBadges[eligibleBadges.length - 1];
+                 s.currentBadge = bestBadge.name;
+             } else { s.currentBadge = "ACEMİ"; }
+        }
+        
+        function renderLeaderboard() {
+            const list = document.getElementById('leaderboardList');
+            let combined = leaderboardBotData.map(u => ({ name: u.name, balance: u.balance, referralCount: u.referralCount || 0, isBot: true }));
+            usersDB.forEach(u => { combined.push({ name: u.username, balance: u.state.balance, referralCount: u.state.referralCount || 0, isBot: false }); });
 
-            const newApps = [];
-            apps.forEach((oldApp, index) => {
-                const title = document.getElementById(`title-${index}`).value;
-                const subtitle = document.getElementById(`subtitle-${index}`).value;
-                const emoji = document.getElementById(`emoji-${index}`).value;
-                const url = document.getElementById(`url-${index}`).value;
-                const colorVal = document.getElementById(`color-${index}`).value.split('|');
-                newApps.push({ ...oldApp, title, subtitle, emoji, url, colorStart: colorVal[0], colorEnd: colorVal[1] });
+            if(currentLeaderboardTab === 'balance') combined.sort((a,b) => b.balance - a.balance);
+            else { combined.sort((a,b) => b.referralCount - a.referralCount); }
+
+            list.innerHTML = combined.slice(0, 100).map((user, index) => {
+                let rankIcon = `<span class="text-xs font-bold text-slate-500 w-6 text-center">${index+1}</span>`;
+                if(index === 0) rankIcon = `<i data-lucide="crown" class="w-4 h-4 text-amber-400 fill-amber-400/20"></i>`;
+                else if(index === 1) rankIcon = `<i data-lucide="medal" class="w-4 h-4 text-slate-400 fill-slate-400/20"></i>`;
+                else if(index === 2) rankIcon = `<i data-lucide="medal" class="w-4 h-4 text-amber-700 fill-amber-700/20"></i>`;
+                
+                const isMe = currentUser && user.name === currentUser.username;
+                const displayValue = currentLeaderboardTab === 'balance' ? 
+                    `${Math.floor(user.balance).toLocaleString()} Pts` : 
+                    `${user.referralCount} Ref`;
+                
+                return `
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border ${isMe ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/5'} hover:bg-white/10 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center justify-center w-6">${rankIcon}</div>
+                        <div class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-300 border border-white/10">${user.name.substring(0,1)}</div>
+                        <p class="text-xs font-bold ${isMe ? 'text-indigo-300' : 'text-white'}">${user.name}</p>
+                    </div>
+                    <p class="text-[10px] font-mono text-slate-400">${displayValue}</p>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function updateUpgradeButtonsState() {
+            if(!upgrades || !currentUser) return;
+            const s = currentUser.state;
+            upgrades.forEach(u => {
+                const btn = document.getElementById(`btn-buy-${u.id}`);
+                if (btn) {
+                    if (s.balance >= u.cost) { btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); } 
+                    else { btn.disabled = true; btn.classList.add('opacity-50', 'cursor-not-allowed'); }
+                }
             });
-            apps = newApps;
-            localStorage.setItem('tetraHubApps', JSON.stringify(apps));
-            renderGrid();
-            closeSettings();
-            showToast('Settings Saved.');
         }
 
-        function resetDefaults() {
-            apps = JSON.parse(JSON.stringify(defaultApps));
-            localStorage.setItem('tetraHubApps', JSON.stringify(apps));
-            localStorage.removeItem('tetraHubProfileUrl');
-            globalProfileUrl = '#profile';
-            renderGrid();
-            closeSettings();
-            showToast('Defaults Loaded.');
+        function buyUpgrade(id) {
+            if(!currentUser) return;
+            const s = currentUser.state;
+            const u = upgrades.find(x => x.id === id);
+            if (s.balance >= u.cost) {
+                s.balance -= u.cost;
+                s.basePPH += u.pph;
+                s.adWatchCounts[id] = 0;
+                saveCurrentUser();
+                updateUI(); 
+                renderUpgrades();
+                showToast(appTexts.toast_invest_success);
+            }
+        }
+        
+        function watchAd(id) {
+            if(!currentUser) return;
+            const u = upgrades.find(x => x.id === id);
+            const s = currentUser.state;
+            const maxAds = globalConfig.adMaxLimit || 20;
+            const currentCount = s.adWatchCounts[id] || 0;
+
+            if (currentCount >= maxAds) { 
+                s.basePPH += u.pph;
+                s.adWatchCounts[u.id] = 0;
+                saveCurrentUser(); 
+                updateUI(); 
+                renderUpgrades();
+                showToast(`"${u.name}" Alındı!`);
+                return; 
+            }
+
+            const modal = document.getElementById('adModal');
+            const timerBar = document.getElementById('adTimerBar');
+            modal.classList.remove('hidden'); modal.classList.add('flex');
+            let progress = 0;
+            const timer = setInterval(() => {
+                progress += 5; timerBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        modal.classList.add('hidden'); modal.classList.remove('flex');
+                        s.adWatchCounts[id] = (s.adWatchCounts[id] || 0) + 1;
+                        saveCurrentUser();
+                        renderUpgrades(); 
+                    }, 200);
+                }
+            }, 50);
         }
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full shadow-xl z-[60] text-sm font-bold flex items-center animate-bounce';
-            toast.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${message}`;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+        function applyTextsToUI() {
+            if(!appTexts) return;
+            Object.keys(appTexts).forEach(key => { const elements = document.querySelectorAll(`[data-text="${key}"]`); elements.forEach(el => el.innerText = appTexts[key]); });
         }
 
-        window.onload = function() { 
-            renderGrid(); 
-            updateProfileUI(); 
-        };
+        function renderReferralList() {
+            const list = document.getElementById('referralList');
+            if(!currentUser) return;
+            const refs = currentUser.state.referralList || [];
+            if(refs.length === 0) { 
+                list.innerHTML = `<div class="p-8 text-center border border-dashed border-white/5 rounded-2xl">
+                    <i data-lucide="user-plus" class="w-8 h-8 text-slate-600 mx-auto mb-2"></i>
+                    <p class="text-[10px] text-slate-500 italic uppercase tracking-widest">${appTexts.lbl_no_referrals}</p>
+                </div>`; 
+                lucide.createIcons();
+                return; 
+            }
+            list.innerHTML = refs.map(member => `
+                <div class="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-500/10 flex items-center justify-center text-[10px] font-bold text-indigo-300 border border-indigo-500/20">
+                            ${member.name.substring(0,2).toUpperCase()}
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-white">${member.name}</p>
+                            <p class="text-[9px] text-emerald-400 font-mono tracking-tighter uppercase">OPERATÖR</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 rounded-full ${member.active ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-slate-600'}"></div>
+                        <span class="text-[8px] font-bold uppercase tracking-wider ${member.active ? 'text-emerald-400' : 'text-slate-500'}">
+                            ${member.active ? 'Aktif' : 'Pasif'}
+                        </span>
+                    </div>
+                </div>`).join('');
+            lucide.createIcons();
+        }
+
+        function switchTab(tabId) { 
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
+            document.getElementById(`tab-${tabId}`).classList.add('active'); 
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === tabId));
+            if(tabId === 'ekip') renderReferralList();
+            if(tabId === 'liderler') renderLeaderboard();
+            if(tabId === 'market') renderUpgrades();
+        }
+
+        function showToast(msg) { const toast = document.getElementById('toast'); document.getElementById('toastMsg').innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2000); }
+        
+        function copyCode() { 
+            if(!currentUser) return; 
+            const el = document.createElement('textarea'); 
+            el.value = currentUser.state.referralCode; 
+            document.body.appendChild(el); 
+            el.select(); 
+            document.execCommand('copy'); 
+            document.body.removeChild(el); 
+            const display = document.getElementById('refCodeDisplay'); 
+            display.innerText = "KOPYALANDI"; 
+            setTimeout(() => { display.innerText = currentUser.state.referralCode; }, 1000); 
+        }
+        
+        function renderUpgrades() {
+            const list = document.getElementById('upgradesList');
+            if(!upgrades || !currentUser) return;
+            const maxAds = globalConfig.adMaxLimit || 20;
+            const s = currentUser.state;
+            list.innerHTML = upgrades.map(u => {
+                const currentAdCount = s.adWatchCounts[u.id] || 0;
+                const adProgressPercent = Math.min((currentAdCount / maxAds) * 100, 100);
+                const canAfford = s.balance >= u.cost;
+                const isFreeClaim = currentAdCount >= maxAds;
+                
+                let adButtonContent = isFreeClaim ? 
+                    `<span>ÜCRETSİZ AL</span>` : 
+                    `<div class="flex items-center gap-1.5"><i data-lucide="play-circle" class="w-3 h-3"></i><span>Sinyal (${currentAdCount}/${maxAds})</span></div>`;
+                
+                let adButtonClass = isFreeClaim ? 
+                    "bg-emerald-500 text-white hover:bg-emerald-600 shadow-[0_0_15px_rgba(16,185,129,0.5)] border-transparent animate-pulse" : 
+                    "bg-indigo-600/20 border-indigo-500/50 text-indigo-300 hover:bg-indigo-600/30";
+                
+                return `
+                <div class="aesthetic-card p-4 relative overflow-hidden transition-all duration-300 group">
+                    <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+                    <div class="flex items-start justify-between gap-4 relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center text-cyan-300 border border-white/10 shadow-inner"><i data-lucide="${u.icon || 'box'}" class="w-7 h-7"></i></div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white leading-tight">${u.name}</h4>
+                                <p class="text-[10px] text-slate-400 italic mt-0.5 max-w-[140px] leading-snug">${u.d}</p>
+                                <div class="flex items-center gap-1 mt-2"><i data-lucide="zap" class="w-3 h-3 text-emerald-400 fill-current"></i><p class="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wide">+${u.pph}/sa</p></div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1.5 items-end w-[115px]">
+                            <button id="btn-buy-${u.id}" onclick="buyUpgrade(${u.id})" class="w-full py-2 bg-white text-slate-950 rounded-lg font-luxury font-extrabold text-[9px] shadow-lg flex items-center justify-center gap-1 transition-all ${canAfford ? 'active:scale-95' : 'opacity-50'}" ${!canAfford ? 'disabled' : ''}>${u.cost.toLocaleString()}</button>
+                            <button id="btn-ad-${u.id}" onclick="watchAd(${u.id})" class="w-full py-2 border rounded-lg font-bold text-[8px] uppercase tracking-wide active:scale-95 transition-all flex items-center justify-center ${adButtonClass}">${adButtonContent}</button>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-white/5">
+                        <div class="flex justify-between items-center mb-1"><span class="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Sinyal İşleme</span><span class="text-[8px] font-bold text-indigo-400">${Math.floor(adProgressPercent)}%</span></div>
+                        <div class="h-1 bg-slate-800 rounded-full overflow-hidden"><div class="ad-progress-fill" style="width: ${adProgressPercent}%"></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+            lucide.createIcons();
+        }
+
+        function switchLeaderboardTab(tab) { currentLeaderboardTab = tab; document.getElementById('lb-tab-balance').className = tab === 'balance' ? "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase bg-white/10 text-white transition-all" : "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-all"; document.getElementById('lb-tab-badge').className = tab === 'badge' ? "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase bg-white/10 text-white transition-all" : "flex-1 py-2 rounded-lg text-[10px] font-bold uppercase text-slate-500 hover:text-white transition-all"; renderLeaderboard(); }
+        
+        function connectWallet() { if(!currentUser) return; currentUser.state.isWalletConnected = true; saveCurrentUser(); updateUI(); showToast("Cüzdan Doğrulandı!"); }
+        
+        function transferTokens() { 
+            if(!currentUser) return; 
+            const tokenBal = Math.floor(currentUser.state.balance / globalConfig.exchangeRate); 
+            if (!currentUser.state.isWalletConnected) return showToast("Önce cüzdan bağlayın!");
+            if (tokenBal < globalConfig.minTransferTokens) return showToast(`Min. Çekim: ${globalConfig.minTransferTokens} Token`);
+            const btn = document.getElementById('transferTokensBtn'); 
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> İşleniyor...`; 
+            setTimeout(() => { 
+                showToast("Aktarım Başarılı!"); 
+                currentUser.state.balance = 0; 
+                saveCurrentUser(); updateUI(); 
+                btn.innerHTML = '<i data-lucide="arrow-down-to-line" class="w-5 h-5 text-cyan-400"></i> Token Çek'; 
+                lucide.createIcons();
+            }, 2000); 
+        }
+
+        window.onload = init;
     </script>
 </body>
 </html>
-
